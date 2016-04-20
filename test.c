@@ -9,7 +9,7 @@
 // Use project enums instead of #define for ON and OFF.
 
 // CONFIG
-#pragma config FOSC = HS        // Oscillator Selection bits (HS oscillator: High speed crystal/resonator on GP4/OSC2/CLKOUT and GP5/OSC1/CLKIN)
+#pragma config FOSC = INTRCIO
 #pragma config WDTE = OFF       // Watchdog Timer Enable bit (WDT disabled)
 #pragma config PWRTE = OFF      // Power-Up Timer Enable bit (PWRT disabled)
 #pragma config MCLRE = OFF      // GP3/MCLR pin function select (GP3/MCLR pin function is digital I/O, MCLR internally tied to VDD)
@@ -17,15 +17,16 @@
 #pragma config CP = OFF         // Code Protection bit (Program Memory code protection is disabled)
 #pragma config CPD = OFF        // Data Code Protection bit (Data memory code protection is disabled)
 
-#define INPUT1 GPIO0
-#define INPUT2 GPIO3            // GPIO3 is input only pin
-#define OUTPUT GPIO2
-
+#define START GPIO0
+#define MET_DET GPIO1            // GPIO3 is input only pin
+#define CONVEYER GPIO2
+#define ON 0
+#define OFF 1
 int main()
 {
     GPIO = 0x00;        // All GPIO pins '0'
     TRISIO0 = 1;        // GPIO0 input
-    TRISIO3 = 1;        // GPIO3 input
+    TRISIO1 = 1;        // GPIO3 input
     TRISIO2 = 0;        // GPIO2 ouput
     CMCON = 0x07;       // Disable Comparator; to use GPIO pins as digital pins
     ANSEL = 0x00;       // Disable Analog ip; all GPIO pins are digital pins    
@@ -37,24 +38,24 @@ int main()
     */
     while(1)
     {
-        if(INPUT1 == 1 && INPUT2 == 0)      
+        if(START == ON && MET_DET == OFF)      
         {
-            OUTPUT = 0;
+            CONVEYER = 1;
         }
         
-        else if(INPUT1 == 0 && INPUT2 == 1)
+        else if(START == OFF && MET_DET == ON)
         {
-            OUTPUT = 1;
-        }
-        /*
-        else if(INPUT1 == 0 && INPUT2 == 0)
-        {
-            OUTPUT = ?;
+            CONVEYER = 0;
         }
         
-        else if(INPUT1 == 1 && INPUT2 == 1)
+        else if(START == OFF && MET_DET == OFF)
         {
-            OUTPUT = ?;
-        }*/
+            CONVEYER = GPIO2;
+        }
+        
+        else if(START == ON && MET_DET == ON)
+        {
+            CONVEYER = 0;
+        }
     }
 }
